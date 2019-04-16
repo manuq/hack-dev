@@ -1,0 +1,46 @@
+---
+# Hack modules you wish to ensure in a specific branch. All modules
+# accept branch stable and master. By default the stable branch will
+# be obtained.
+hack_modules:
+  - name: com.endlessm.Clubhouse
+    branch: stable
+  - name: com.endlessm.Fizzics
+    branch: stable
+  - name: com.endlessm.GameStateService
+    branch: stable
+  - name: com.endlessm.HackAccountService
+    branch: stable
+  - name: com.endlessm.HackComponents
+    branch: stable
+  - name: com.endlessm.HackSoundServer
+    branch: stable
+  - name: com.endlessm.HackToolbox
+    branch: stable
+  - name: com.endlessm.Hackdex_chapter_one
+    branch: stable
+  - name: com.endlessm.LightSpeed
+    branch: stable
+  - name: com.endlessm.OperatingSystemApp
+    branch: stable
+
+# Add any extra apps you want to be installed here. By default they
+# will be obtained from Flathub. Add `remote: myremote` to change
+# it. By default the stable branch will be obtained. Add `branch:
+# mybranch` to change it.
+extra_flatpaks:
+  # If you install Barrier from the flatpak in the control machine,
+  # you may need this workaround:
+  # https://github.com/debauchee/barrier/issues/231#issuecomment-456327061
+  - name: com.github.debauchee.barrier
+
+# Path to checkout GIT repositories for building custom modules.
+checkout_dir: ~/checkout
+
+# Your GitHub user for cloning and fetching the git repositories of
+# Hack modules. Your password will be prompted when needed.
+github_user: myuser
+
+# Some remote commands need the DISPLAY environment variable. You
+# probably don't need to change this.
+display: ":0"

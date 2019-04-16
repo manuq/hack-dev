@@ -1,0 +1,12 @@
+---
+# ansible-playbook playbooks/copy_game_state.yaml -e "src_game_state=path/to/state.json"
+
+- hosts: hack-machines
+  gather_facts: no
+  become: no
+  vars_files: ../data/vars.yaml
+  tasks:
+  - name: Copy game state
+    copy:
+      src: "../data/{{ src_game_state }}"
+      dest: "{{ game_state_path }}"

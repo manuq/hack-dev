@@ -1,0 +1,16 @@
+---
+# ansible-playbook playbooks/checkout_github_repo.yaml -e "github_repo=some/repo dest_dir=mydir"
+# ansible-playbook playbooks/checkout_github_repo.yaml -e "github_repo=some/repo dest_dir=mydir branch=mybranch"
+
+- hosts: hack-machines
+  gather_facts: no
+  become: no
+  vars:
+    branch: master
+  vars_files: ./vars.yaml
+  vars_prompt:
+    - name: "github_password"
+      prompt: "Password for 'https://{{ github_user }}@github.com'"
+      private: yes
+  tasks:
+  - import_tasks: tasks/checkout_github_repo.yaml

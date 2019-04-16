@@ -1,0 +1,4 @@
+- name: Restart the clubhouse
+  shell: /usr/bin/flatpak run com.endlessm.Clubhouse --quit
+  environment:
+    DISPLAY: "{{ display }}"

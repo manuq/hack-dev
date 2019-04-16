@@ -1,0 +1,17 @@
+---
+- name: Ensure the flatpak is present
+  become: yes
+  flatpak:
+    name: "{{ item.name }}/{{ default_arch.stdout }}/{{ item.branch | default('stable') }}"
+    # FIXME should be done through PolicyKit?
+    state: present
+    remote: "{{ item.remote | default(flatpak_remote) }}"
+- name: Check if the flatpak is current
+  shell: "/usr/bin/flatpak list --system --app | grep {{ item.name }}/{{ default_arch.stdout }}/{{ item.branch | default('stable') }} | grep -q current"
+  register: is_current
+  changed_when: no
+  failed_when: no
+- name: If not, make the flatpak current
+  when: is_current.rc == 1
+  command: "/usr/bin/flatpak make-current --system --arch={{ default_arch.stdout }} {{ item.name }} {{ item.branch | default('stable') }}"
+  become: yes

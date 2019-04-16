@@ -1,0 +1,16 @@
+---
+# ansible-playbook playbooks/fetch_game_state.yaml
+# ansible-playbook playbooks/fetch_game_state.yaml -e "dest_name=mystate.json"
+
+- hosts: hack-machines
+  gather_facts: no
+  become: no
+  vars:
+    default_name: "state-{{ lookup('pipe','date +%Y-%m-%d-%H-%M-%S') }}.json"
+  vars_files: ../data/vars.yaml
+  tasks:
+  - name: Fetch game state
+    fetch:
+      flat: yes
+      dest: "../data/game-states/{{ inventory_hostname }}/{{ dest_name | default(default_name) }}"
+      src: "{{ game_state_path }}"

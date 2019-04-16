@@ -1,0 +1,9 @@
+---
+# ansible-playbook playbooks/restart_clubhouse.yaml
+
+- hosts: hack-machines
+  gather_facts: no
+  become: no
+  vars_files: ../data/vars.yaml
+  tasks:
+  - include_tasks: tasks/restart_clubhouse.yaml

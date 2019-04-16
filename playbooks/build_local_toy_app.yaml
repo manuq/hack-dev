@@ -1,0 +1,33 @@
+---
+# ansible-playbook playbooks/build_local_toy_app.yaml
+# ansible-playbook playbooks/build_local_toy_app.yaml -e "branch=mybranch"
+
+- hosts: hack-machines
+  gather_facts: no
+  become: no
+  vars:
+    branch: master
+    dest_dir: hack-toy-apps
+    toy_app_name: Fizzics
+  vars_files: ../data/vars.yaml
+  vars_prompt:
+    - name: "github_password"
+      prompt: "Password for 'https://{{ github_user }}@github.com'"
+      private: yes
+  tasks:
+  - import_tasks: tasks/checkout_github_repo.yaml
+    vars:
+      github_repo: "endlessm/hack-toy-apps"
+  # FIXME create the dev.json file, should create a flatpak branch "custom"
+  # FIXME build current flatpak with branch "custom"
+  # FIXME build only if the git checkout changed
+  - name: Get home directory
+    shell: "echo $HOME"
+    register: home_dir
+    changed_when: false
+    check_mode: no
+  - name: Build and install a local version of the toy app
+    command: "/usr/bin/flatpak-builder build --force-clean com.endlessm.{{ toy_app_name }}.dev.json --repo=repo --install"
+    become: yes
+    args:
+      chdir: "{{ checkout_dir | regex_replace('^~', home_dir.stdout) }}/{{ dest_dir }}/"

@@ -1,0 +1,13 @@
+#!/bin/bash -e
+#
+# Setup.
+
+source_dir="$(git rev-parse --show-toplevel)"
+bin_dir="${source_dir}/bin"
+source $bin_dir/_common
+
+if [ "$0" = "$BASH_SOURCE" ]; then
+    source "${bin_dir}/bootstrap"
+    ensure_ansible
+    $flatpak_shell --init-file <(echo "source $HOME/.bashrc ; source $virtualenv_dir/bin/activate ; alias run='ansible $host_pattern'")
+fi

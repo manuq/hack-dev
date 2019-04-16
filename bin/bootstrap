@@ -1,0 +1,107 @@
+#!/bin/bash -e
+#
+# Setup.
+
+source_dir="$(git rev-parse --show-toplevel)"
+bin_dir="${source_dir}/bin"
+source $bin_dir/_common
+
+function setup_ansible {
+    if [ ! -d $virtualenv_dir ]; then
+        echo "Setting up virtual env"
+        $flatpak_shell <<EOF
+            python3 -mvenv "$virtualenv_dir"
+EOF
+        echo "Upgrading pip"
+	run_in_python_venv pip install --upgrade pip
+        echo "Installing ansible"
+	run_in_python_venv pip install ansible
+        echo "Installing jmespath"
+	run_in_python_venv pip install jmespath
+        return 0
+    fi
+
+    return 1
+}
+
+function upgrade_ansible {
+    if [ -d $virtualenv_dir ]; then
+        echo "Upgrading pip"
+	run_in_python_venv pip install --upgrade pip
+        echo "Upgrading ansible"
+	run_in_python_venv pip install --upgrade ansible
+        echo "Upgrading jmespath"
+	run_in_python_venv pip install --upgrade jmespath
+        return 0
+    fi
+
+    return 1
+}
+
+function setup_ansible_inventory () {
+    hack_machines=$1
+    sed -e "s|@HACK_MACHINES@|${hack_machines}|g" \
+        -e "s|@HACK_GROUP@|${hack_group}|g" \
+        $hosts_template_path > $hosts_path
+}
+
+function interactive_setup_ansible_inventory {
+    if [ -f "$hosts_path" ]; then
+        read -p "You already have a hosts file. Overwrite it? (y/N): " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            return
+        fi
+    fi
+
+    hack_machines=""
+    while true ; do
+        read -p "Hack machine Computer name: " hostname
+        read -p "Hack machine User name: " username
+        host_line="${hostname}.local ansible_user=${username}"
+
+        if [ -z "$hack_machines" ]; then
+            hack_machines="${host_line}"
+        else
+            hack_machines="${hack_machines}\n${host_line}"
+        fi
+
+        read -p "Add another Hack machine? (y/N): " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            break
+        fi
+    done
+
+    setup_ansible_inventory "${hack_machines}"
+}
+
+function interactive_setup_vars {
+    if [ -f "$vars_path" ]; then
+        read -p "You already have a vars file. Overwrite it? (y/N): " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            return
+        fi
+    fi
+    cp $vars_template_path $vars_path
+}
+
+function ensure_ansible {
+    setup_ansible || upgrade_ansible
+}
+
+function interactive_setup_ansible {
+    read -p "Install Ansible? (y/N): " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        return
+    fi
+    ensure_ansible
+}
+
+if [ "$0" = "$BASH_SOURCE" ]; then
+    interactive_setup_ansible_inventory
+    interactive_setup_vars
+    interactive_setup_ansible
+fi

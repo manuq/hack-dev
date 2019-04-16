@@ -1,0 +1,17 @@
+---
+# ansible-playbook playbooks/ensure_extra_flatpaks.yaml --ask-become-pass
+
+- hosts: hack-machines
+  gather_facts: no
+  become: no
+  vars:
+    flatpak_remote: "flathub"
+  vars_files: ../data/vars.yaml
+  tasks:
+  - name: Get the default flatpak arch
+    command: "/usr/bin/flatpak --default-arch"
+    register: default_arch
+    changed_when: no
+  - name: Ensure flatpaks
+    include_tasks: tasks/flatpak_branch.yaml
+    loop: "{{ extra_flatpaks }}"

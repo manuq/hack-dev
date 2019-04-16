@@ -1,0 +1,5 @@
+- name: Ensure a local checkout of the github repo
+  git:
+    repo: "https://{{ github_user | urlencode }}:{{ github_password | urlencode }}@github.com/{{ github_repo | mandatory }}"
+    dest: "{{ checkout_dir }}/{{ dest_dir | mandatory}}/"
+    version: "{{ branch }}"

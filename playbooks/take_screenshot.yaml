@@ -1,0 +1,33 @@
+---
+# ansible-playbook playbooks/take_screenshot.yaml
+# ansible-playbook playbooks/take_screenshot.yaml -e "dest_name=mypic.png"
+
+- hosts: hack-machines
+  gather_facts: no
+  become: no
+  vars_files: ../data/vars.yaml
+  tasks:
+  - find:
+      paths: ~/Pictures/
+      age: -1d
+      patterns: 'Screenshot*png'
+    register: screenshots_orig
+  - set_fact: screenshots_orig="{{ screenshots_orig | json_query('files[*].path') }}"
+  - name: Take a screenshot
+    shell: gnome-screenshot
+    environment:
+      DISPLAY: "{{ display }}"
+  - name: Pause for safety
+    pause:
+  - find:
+      paths: ~/Pictures/
+      age: -1d
+      patterns: 'Screenshot*png'
+    register: screenshots_new
+  - set_fact: screenshots_new="{{ screenshots_new | json_query('files[*].path') }}"
+  - set_fact: new_screenshot_path="{{ screenshots_new | difference(screenshots_orig) | first }}"
+  - name: Fetch the screenshot
+    fetch:
+      flat: yes
+      dest: "../data/screenshots/{{ inventory_hostname }}/{{ dest_name | default('') }}"
+      src: "{{ new_screenshot_path }}"

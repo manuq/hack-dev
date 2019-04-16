@@ -1,0 +1,6 @@
+[@HACK_GROUP@]
+@HACK_MACHINES@
+
+[@HACK_GROUP@:vars]
+ansible_python_interpreter=python3
+game_state_path="~/.var/app/com.endlessm.GameStateService/data/state.json"

@@ -1,0 +1,31 @@
+#!/bin/bash -e
+#
+# Common.
+
+source_dir="$(git rev-parse --show-toplevel)"
+virtualenv_dir="${source_dir}/.python-virtual-env"
+
+hosts_path="${source_dir}/data/hosts"
+hosts_template_path="${source_dir}/data/hosts.template"
+
+vars_path="${source_dir}/data/vars.yaml"
+vars_template_path="${source_dir}/data/vars.yaml.template"
+
+runtime="org.gnome.Platform//3.30"
+flatpak_shell="flatpak run --filesystem=home --socket=session-bus --share=network --command=bash $runtime"
+
+# Common variables.
+
+hack_group="hack-machines"
+host_pattern=$hack_group
+
+function run_in_python_venv {
+    return $($flatpak_shell <<EOF
+    source "$virtualenv_dir/bin/activate"
+    $@ >&2
+    ret=\$?
+    deactivate
+    exit \$ret
+EOF
+            )
+}

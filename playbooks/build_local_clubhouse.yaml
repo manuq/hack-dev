@@ -1,0 +1,31 @@
+---
+# ansible-playbook playbooks/build_local_clubhouse.yaml
+# ansible-playbook playbooks/build_local_clubhouse.yaml -e "branch=mybranch"
+
+- hosts: hack-machines
+  gather_facts: no
+  become: no
+  vars:
+    branch: master
+    dest_dir: clubhouse
+  vars_files: ../data/vars.yaml
+  vars_prompt:
+    - name: "github_password"
+      prompt: "Password for 'https://{{ github_user }}@github.com'"
+      private: yes
+  tasks:
+  - import_tasks: tasks/checkout_github_repo.yaml
+    vars:
+      github_repo: "endlessm/clubhouse"
+  # FIXME build only if the git checkout changed
+  - name: Get home directory
+    shell: "echo $HOME"
+    register: home_dir
+    changed_when: false
+    check_mode: no
+  - name: Build and install a local version of the clubhouse
+    command: "./tools/build-local-flatpak.sh --install"
+    become: yes
+    args:
+      chdir: "{{ checkout_dir | regex_replace('^~', home_dir.stdout) }}/{{ dest_dir }}/"
+  - import_tasks: tasks/restart_clubhouse.yaml

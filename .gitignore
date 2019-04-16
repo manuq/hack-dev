@@ -1,0 +1,12 @@
+# Ignore the virtualenv directory:
+/.python-virtual-env
+
+# Ignore the files that can be customized:
+/data/hosts
+/data/vars.yaml
+
+# Ignore the fetched game states:
+/data/game-states/*
+
+# Ignore the retry files:
+/data/*.retry
